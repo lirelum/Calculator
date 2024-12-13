@@ -1,14 +1,28 @@
+import java.math.BigInteger
+
 open class BinaryOperation(
-    private val op: (Int, Int) -> Int,
+    private val op: (BigInteger, BigInteger) -> BigInteger,
     private val left: Expression,
     private val right: Expression
 ) : Expression {
-    override operator fun invoke(): Int {
+    override operator fun invoke(): BigInteger {
         return op(left(), right())
     }
-    class Sum(private val left: Expression, private val right: Expression) : BinaryOperation({ a, b -> a + b }, left, right) {}
-    class Sub(private val left: Expression, private val right: Expression) : BinaryOperation({ a, b -> a - b }, left, right) {}
-    class Mul(private val left: Expression, private val right: Expression) : BinaryOperation({ a, b -> a * b }, left, right) {}
-    class Div(private val left: Expression, private val right: Expression) : BinaryOperation({ a, b -> a / b }, left, right) {}
-    class Rem(private val left: Expression, private val right: Expression) : BinaryOperation({ a, b -> a % b }, left, right) {}
+    companion object {
+        fun Add(left: Expression, right: Expression): BinaryOperation {
+            return BinaryOperation(Operation.ADD::invoke, left, right)
+        }
+        fun Sub(left: Expression, right: Expression): BinaryOperation {
+            return BinaryOperation(Operation.SUB::invoke, left, right)
+        }
+        fun Mul(left: Expression, right: Expression): BinaryOperation {
+            return BinaryOperation(Operation.MUL::invoke, left, right)
+        }
+        fun Div(left: Expression, right: Expression): BinaryOperation {
+            return BinaryOperation(Operation.DIV::invoke, left, right)
+        }
+        fun Mod(left: Expression, right: Expression): BinaryOperation {
+            return BinaryOperation(Operation.REM::invoke, left, right)
+        }
+    }
 }

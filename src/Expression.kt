@@ -1,3 +1,5 @@
-interface Expression {
-    operator fun invoke(): Int
+import java.math.BigInteger
+
+fun interface Expression {
+    operator fun invoke(): BigInteger
 }

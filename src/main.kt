@@ -1,8 +1,11 @@
 fun main() {
-    val expr = add(Literal(1), mul(Literal(2), Literal(2)))
+    val expr = BinaryOperation.Add(
+        Literal(1.toBigInteger()),
+        BinaryOperation.Mul(
+            Literal(2.toBigInteger()),
+            Literal(2.toBigInteger())
+        )
+    )
     val result = expr()
     println(result)
-    val str = "(1+2)/3"
-    val tokens = tokenize(str)
-    println(tokens)
 }
