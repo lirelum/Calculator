@@ -8,6 +8,7 @@ enum class Operation {
     MUL,
     DIV,
     REM;
+
     operator fun invoke(left: BigInteger, right: BigInteger): BigInteger {
         return when (this) {
             ADD -> left.plus(right)
