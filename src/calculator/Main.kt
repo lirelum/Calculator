@@ -5,7 +5,7 @@ import calculator.expression.BinaryOperation
 import calculator.expression.Literal
 import calculator.tokenizer.tokenize
 
-fun main(args: Array<String>) {
+fun main() {
     val expr = BinaryOperation.Add(
         Literal(1.toBigInteger()),
         BinaryOperation.Mul(
@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
     )
     val result = expr()
     println(result)
-    val str = "1+1+2-3-234234/12341231"
+    val str = "1+1+1+1+1+1+1"
     val tokens = tokenize(str)
     val parse = Parser(tokens).parse()
     println(parse)

@@ -1,6 +1,6 @@
 import calculator.tokenizer.Token
 
-class Parser(private val tokens: List<Token>) {
+class Parser(tokens: List<Token>) {
     private class CurrentToken(private val tokens: Iterator<Token>) {
          var current = if (tokens.hasNext()) (tokens.next()) else null
              private set
@@ -19,11 +19,11 @@ class Parser(private val tokens: List<Token>) {
         return when(currentToken.current) {
             is Token.Add -> {
                 currentToken.next()
-                true
+                term() && expressionP()
             }
             is Token.Sub -> {
                 currentToken.next()
-                true
+                term() && expressionP()
             }
             else -> true
         }
@@ -35,9 +35,29 @@ class Parser(private val tokens: List<Token>) {
         return when(currentToken.current) {
             is Token.Mul -> {
                 currentToken.next()
+                factor() && termP()
+            }
+            is Token.Div -> {
+                currentToken.next()
+                factor() && termP()
+            }
+            else -> true
+        }
+    }
+    private fun factor(): Boolean {
+        return when(currentToken.current) {
+            is Token.Literal -> {
+                currentToken.next()
                 true
             }
-            
+            is Token.LeftParen -> {
+                currentToken.next()
+                val e = expression()
+                val b = currentToken.current is Token.RightParen
+                currentToken.next()
+                e && b
+            }
+            else -> false
         }
     }
 }

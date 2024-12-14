@@ -10,19 +10,24 @@ private enum class State {
     OPERATOR,
     LEFT_PARENTHESIS,
     RIGHT_PARENTHESIS,
+    ROOT,
 }
 private fun scan(string: String): List<RawToken> {
     val numerals = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
     val whitespace = setOf(' ', '\n', '\r', '\t')
     val operators = setOf('+', '-', '*', '/', '%')
     val tokens = mutableListOf<RawToken>()
-    var state = State.LITERAL
+    var state = State.ROOT
     var literalBuf = ""
     var operatorBuf = ""
     for (char in string) {
        when (char) {
            in numerals -> {
                when (state) {
+                   State.ROOT -> {
+                       state = State.LITERAL
+                       literalBuf += char
+                   }
                    State.LITERAL -> {
                        literalBuf += char
                    }
@@ -42,6 +47,7 @@ private fun scan(string: String): List<RawToken> {
            in whitespace -> {}
            in operators -> {
                when (state) {
+                   State.ROOT -> throw TokenizerException("Unexpected character '$char'")
                    State.LITERAL -> {
                        tokens.add(RawToken.Literal(literalBuf))
                        literalBuf = ""
@@ -58,6 +64,10 @@ private fun scan(string: String): List<RawToken> {
            }
            '(' -> {
                when (state) {
+                   State.ROOT -> {
+                       state = State.LEFT_PARENTHESIS
+                       tokens.add(RawToken.LeftParen)
+                   }
                    State.LITERAL -> {
                        tokens.add(RawToken.Literal(literalBuf))
                        literalBuf = ""
@@ -76,6 +86,7 @@ private fun scan(string: String): List<RawToken> {
            }
            ')' -> {
                when (state) {
+                   State.ROOT -> throw TokenizerException("Unexpected character '$char'")
                    State.LITERAL -> {
                        tokens.add(RawToken.Literal(literalBuf))
                        literalBuf = ""
