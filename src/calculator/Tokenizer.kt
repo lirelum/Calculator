@@ -10,13 +10,13 @@ private enum class State {
     RIGHT_PARENTHESIS,
 }
 private fun scan(string: String): List<RawToken> {
-    val numerals: Set<Char> = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-    val whitespace: Set<Char> = setOf(' ', '\n', '\r', '\t')
-    val operators: Set<Char> = setOf('+', '-', '*', '/', '%')
+    val numerals = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+    val whitespace = setOf(' ', '\n', '\r', '\t')
+    val operators = setOf('+', '-', '*', '/', '%')
     val tokens = mutableListOf<RawToken>()
-    var state: State = State.LITERAL
-    var literalBuf: String = ""
-    var operatorBuf: String = ""
+    var state = State.LITERAL
+    var literalBuf = ""
+    var operatorBuf = ""
     for (char in string) {
        when (char) {
            in numerals -> {
