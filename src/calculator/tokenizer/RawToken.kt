@@ -1,4 +1,4 @@
-package calculator
+package calculator.tokenizer
 
 import calculator.expression.Operation
 import java.math.BigInteger
@@ -12,11 +12,11 @@ sealed class RawToken {
     data class Operator(val value: String) : RawToken() {
         override fun eval(): Token {
            return when (value) {
-               "+" -> Token.Operator(Operation.ADD)
-               "-" -> Token.Operator(Operation.SUB)
-               "*" -> Token.Operator(Operation.MUL)
-               "/" -> Token.Operator(Operation.DIV)
-               "%" -> Token.Operator(Operation.REM)
+               "+" -> Token.Add
+               "-" -> Token.Sub
+               "*" -> Token.Mul
+               "/" -> Token.Div
+               "%" -> Token.Rem
                else -> throw IllegalArgumentException("Unknown operator: $value")
            }
         }

@@ -1,4 +1,6 @@
-package calculator
+package calculator.tokenizer
+
+class TokenizerException(msg: String) : Exception(msg)
 
 fun tokenize(string: String): List<Token> {
     return scan(string).map(RawToken::eval)
@@ -34,7 +36,7 @@ private fun scan(string: String): List<RawToken> {
                        state = State.LITERAL
                        literalBuf += char
                    }
-                   State.RIGHT_PARENTHESIS -> throw Exception("Unexpected character '$char'")
+                   State.RIGHT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
                }
            }
            in whitespace -> {}
@@ -46,8 +48,8 @@ private fun scan(string: String): List<RawToken> {
                        state = State.OPERATOR
                        operatorBuf += char
                    }
-                   State.OPERATOR -> throw Exception("Unexpected character '$char'")
-                   State.LEFT_PARENTHESIS -> throw Exception("Unexpected character '$char'")
+                   State.OPERATOR -> throw TokenizerException("Unexpected character '$char'")
+                   State.LEFT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
                    State.RIGHT_PARENTHESIS -> {
                        state = State.OPERATOR
                        operatorBuf += char
@@ -68,8 +70,8 @@ private fun scan(string: String): List<RawToken> {
                        tokens.add(RawToken.LeftParen)
                        state = State.LEFT_PARENTHESIS
                    }
-                   State.RIGHT_PARENTHESIS -> throw Exception("Unexpected character '$char'")
-                   State.LEFT_PARENTHESIS -> throw Exception("Unexpected character '$char'")
+                   State.RIGHT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
+                   State.LEFT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
                }
            }
            ')' -> {
@@ -86,11 +88,11 @@ private fun scan(string: String): List<RawToken> {
                        tokens.add(RawToken.RightParen)
                        state = State.RIGHT_PARENTHESIS
                    }
-                   State.LEFT_PARENTHESIS -> throw Exception("Unexpected character '$char'")
-                   State.RIGHT_PARENTHESIS -> throw Exception("Unexpected character '$char'")
+                   State.LEFT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
+                   State.RIGHT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
                }
            }
-           else -> throw Exception("Unexpected character '$char'")
+           else -> throw TokenizerException("Unexpected character '$char'")
        }
     }
     if (state == State.LITERAL && literalBuf.isNotEmpty()) {tokens.add(RawToken.Literal(literalBuf))}

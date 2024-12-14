@@ -1,7 +1,9 @@
 package calculator
 
+import Parser
 import calculator.expression.BinaryOperation
 import calculator.expression.Literal
+import calculator.tokenizer.tokenize
 
 fun main(args: Array<String>) {
     val expr = BinaryOperation.Add(
@@ -13,7 +15,8 @@ fun main(args: Array<String>) {
     )
     val result = expr()
     println(result)
-    val str = "1+1+(1+ 3)   / 2/2+2192873198273981723981729832938293-87-9-111(1)+2)"
+    val str = "1+1+2-3-234234/12341231"
     val tokens = tokenize(str)
-    println(tokens)
+    val parse = Parser(tokens).parse()
+    println(parse)
 }
