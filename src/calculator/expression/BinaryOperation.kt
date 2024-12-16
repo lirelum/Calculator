@@ -28,8 +28,5 @@ open class BinaryOperation(
             return BinaryOperation(Operation.DIV::invoke, left, right)
         }
 
-        fun Mod(left: Expression, right: Expression): BinaryOperation {
-            return BinaryOperation(Operation.REM::invoke, left, right)
-        }
     }
 }

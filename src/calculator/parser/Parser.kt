@@ -1,3 +1,6 @@
+import calculator.expression.BinaryOperation
+import calculator.expression.Expression
+import calculator.expression.Literal
 import calculator.tokenizer.Token
 
 class Parser(tokens: List<Token>) {
@@ -11,55 +14,55 @@ class Parser(tokens: List<Token>) {
     }
 
     private val currentToken = CurrentToken(tokens.iterator())
-    fun parse(): Boolean {
+    fun parse(): Expression {
         return expression()
     }
 
-    private fun expression(): Boolean {
-        return term() && expressionP()
+    private fun expression(): Expression {
+        return expressionP(term())
     }
 
-    private fun expressionP(): Boolean {
+    private fun expressionP(expr: Expression): Expression {
         return when (currentToken.current) {
             is Token.Add -> {
                 currentToken.next()
-                term() && expressionP()
+                BinaryOperation.Add(expr, expressionP(term()))
             }
 
             is Token.Sub -> {
                 currentToken.next()
-                term() && expressionP()
+                BinaryOperation.Sub(expr, expressionP(term()))
             }
 
-            else -> true
+            else -> expr
         }
     }
 
-    private fun term(): Boolean {
-        return factor() && termP()
+    private fun term(): Expression {
+        return termP(factor())
     }
 
-    private fun termP(): Boolean {
+    private fun termP(expr: Expression): Expression {
         return when (currentToken.current) {
             is Token.Mul -> {
                 currentToken.next()
-                factor() && termP()
+                BinaryOperation.Mul(expr, termP(factor()))
             }
 
             is Token.Div -> {
                 currentToken.next()
-                factor() && termP()
+                BinaryOperation.Div(expr, termP(factor()))
             }
 
-            else -> true
+            else -> expr
         }
     }
 
-    private fun factor(): Boolean {
-        return when (currentToken.current) {
+    private fun factor(): Expression {
+        return when (val cur = currentToken.current) {
             is Token.Literal -> {
                 currentToken.next()
-                true
+                Literal(cur.value)
             }
 
             is Token.LeftParen -> {
@@ -67,10 +70,10 @@ class Parser(tokens: List<Token>) {
                 val e = expression()
                 val b = currentToken.current is Token.RightParen
                 currentToken.next()
-                e && b
+                if (b) e else throw Exception("Parse failed, parens")
             }
 
-            else -> false
+            else -> throw Exception("Parse failed, unknown")
         }
     }
 }
