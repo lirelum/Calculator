@@ -3,130 +3,45 @@ package calculator.tokenizer
 class TokenizerException(msg: String) : Exception(msg)
 
 fun tokenize(string: String): List<Token> {
-    return scan(string).map(RawToken::eval)
+    return scan(string).map(RawToken::invoke)
 }
 
-private enum class State {
-    LITERAL,
-    OPERATOR,
-    LEFT_PARENTHESIS,
-    RIGHT_PARENTHESIS,
-    ROOT,
+private val operators = listOf('+', '-', '*', '/');
+private val digits = listOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+private val whitespace = listOf(' ', '\n', '\r', '\t', '\n');
+
+fun scan(string: String): List<RawToken> {
+    return when (string.firstOrNull()) {
+        in operators -> operator(string)
+        in digits -> digit(string)
+        in whitespace -> scan(string.drop(1))
+        '(', ')' -> paren(string)
+        else -> emptyList()
+    }
 }
 
-private fun scan(string: String): List<RawToken> {
-    val numerals = setOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
-    val whitespace = setOf(' ', '\n', '\r', '\t')
-    val operators = setOf('+', '-', '*', '/', '%')
-    val tokens = mutableListOf<RawToken>()
-    var state = State.ROOT
-    var literalBuf = ""
-    var operatorBuf = ""
-    for (char in string) {
-        when (char) {
-            in numerals -> {
-                when (state) {
-                    State.ROOT -> {
-                        state = State.LITERAL
-                        literalBuf += char
-                    }
-
-                    State.LITERAL -> {
-                        literalBuf += char
-                    }
-
-                    State.OPERATOR -> {
-                        tokens.add(RawToken.Operator(operatorBuf))
-                        operatorBuf = ""
-                        state = State.LITERAL
-                        literalBuf += char
-                    }
-
-                    State.LEFT_PARENTHESIS -> {
-                        state = State.LITERAL
-                        literalBuf += char
-                    }
-
-                    State.RIGHT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
-                }
-            }
-
-            in whitespace -> {}
-            in operators -> {
-                when (state) {
-                    State.ROOT -> throw TokenizerException("Unexpected character '$char'")
-                    State.LITERAL -> {
-                        tokens.add(RawToken.Literal(literalBuf))
-                        literalBuf = ""
-                        state = State.OPERATOR
-                        operatorBuf += char
-                    }
-
-                    State.OPERATOR -> throw TokenizerException("Unexpected character '$char'")
-                    State.LEFT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
-                    State.RIGHT_PARENTHESIS -> {
-                        state = State.OPERATOR
-                        operatorBuf += char
-                    }
-                }
-            }
-
-            '(' -> {
-                when (state) {
-                    State.ROOT -> {
-                        state = State.LEFT_PARENTHESIS
-                        tokens.add(RawToken.LeftParen)
-                    }
-
-                    State.LITERAL -> {
-                        tokens.add(RawToken.Literal(literalBuf))
-                        literalBuf = ""
-                        tokens.add(RawToken.LeftParen)
-                        State.LEFT_PARENTHESIS
-                    }
-
-                    State.OPERATOR -> {
-                        tokens.add(RawToken.Operator(operatorBuf))
-                        operatorBuf = ""
-                        tokens.add(RawToken.LeftParen)
-                        state = State.LEFT_PARENTHESIS
-                    }
-
-                    State.RIGHT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
-                    State.LEFT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
-                }
-            }
-
-            ')' -> {
-                when (state) {
-                    State.ROOT -> throw TokenizerException("Unexpected character '$char'")
-                    State.LITERAL -> {
-                        tokens.add(RawToken.Literal(literalBuf))
-                        literalBuf = ""
-                        tokens.add(RawToken.RightParen)
-                        state = State.RIGHT_PARENTHESIS
-                    }
-
-                    State.OPERATOR -> {
-                        tokens.add(RawToken.Operator(operatorBuf))
-                        operatorBuf = ""
-                        tokens.add(RawToken.RightParen)
-                        state = State.RIGHT_PARENTHESIS
-                    }
-
-                    State.LEFT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
-                    State.RIGHT_PARENTHESIS -> throw TokenizerException("Unexpected character '$char'")
-                }
-            }
-
-            else -> throw TokenizerException("Unexpected character '$char'")
-        }
+fun operator(string: String): List<RawToken> {
+    return when (val c = string.firstOrNull()) {
+        in operators -> listOf(RawToken.Operator(c.toString())) + scan(string.drop(1))
+        else -> scan(string)
     }
-    if (state == State.LITERAL && literalBuf.isNotEmpty()) {
-        tokens.add(RawToken.Literal(literalBuf))
+}
+
+fun digit(string: String): List<RawToken> {
+    return _digit("", string)
+}
+
+fun _digit(buf: String, string: String): List<RawToken> {
+    return when (val c = string.firstOrNull()) {
+        in digits -> {_digit(buf + c, string.drop(1))}
+        else -> (listOf(RawToken.Literal(buf)) + scan(string))
     }
-    if (state == State.OPERATOR && operatorBuf.isNotEmpty()) {
-        tokens.add(RawToken.Operator(operatorBuf))
+}
+
+fun paren(string: String): List<RawToken> {
+    return when (string.firstOrNull()) {
+        '(' -> {listOf(RawToken.LeftParen) + scan(string.drop(1))}
+        ')' -> {listOf(RawToken.RightParen) + scan(string.drop(1))}
+        else -> scan(string)
     }
-    return tokens
 }

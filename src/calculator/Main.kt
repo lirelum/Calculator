@@ -13,25 +13,22 @@ fun main() {
     println("Enter 'quit' or 'q' to exit")
     while (true) {
         System.err.flush()
-        System.out.print(">> ")
-        val expr = readln()
-        val result = when (expr) {
+        print(">> ")
+        when (val expr = readln()) {
             "quit", "q" -> break
             else -> processInput(expr)
-        }
-        result?.let(::println)
+        }?.let(::println)
     }
 }
 
 fun processInput(expr: String): BigInteger? {
-    val tokens = try {
+    return try {
         tokenize(expr)
     }
     catch (e: Exception) {
         System.err.println("Tokenizer error. Did you input a weird character?\n ${e.message}\n")
         null
-    }
-    return tokens?.let {
+    }?.let {
         try {
             (Parser(it).parse())()
         }
